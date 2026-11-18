@@ -245,7 +245,7 @@
       "type": "n8n-nodes-base.removeDuplicates",
       "typeVersion": 2,
       "parameters": {
-        "operation": "removeItemsRepeatedInPreviousExecutions",
+        "operation": "removeItemsSeenInPreviousExecutions",
         "dedupeValue": "={{ $json.output.source_url }}",
         "options": {}
       },
