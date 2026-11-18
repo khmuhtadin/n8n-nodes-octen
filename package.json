@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-octen",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Octen research tools for n8n and AI agents",
   "license": "MIT",
   "homepage": "https://github.com/khmuhtadin/n8n-nodes-octen#readme",
