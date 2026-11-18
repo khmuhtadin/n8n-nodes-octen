@@ -8,7 +8,7 @@ In n8n, open **Settings > Community nodes > Install** and enter `n8n-nodes-octen
 
 ## Credentials
 
-Create an Octen API key in the Octen console, then add an **Octen API** credential in n8n. The node sends it via `x-api-key`. Testing the credential runs a real one-result search and may incur usage charges. A payment method may be required for API access. Never include your key in workflow JSON.
+Create an Octen API key in the Octen console, then add an **Octen API** credential in n8n. The node sends it via `x-api-key`. Testing the credential uses the authenticated, read-only list monitors endpoint. A payment method may be required for some APIs. Never include your key in workflow JSON.
 
 ## Operations
 
@@ -18,9 +18,11 @@ Create an Octen API key in the Octen console, then add an **Octen API** credenti
 - **Search Images**: search by text or a reference image URL. [API reference](https://docs.octen.ai/api-reference/image-search)
 - **Create Embeddings**: embed one text per line for semantic retrieval. [API reference](https://docs.octen.ai/api-reference/embedding)
 
+**Free-tier testing:** Web Search and Broad Search worked with the initial free credits. Extract Pages, Search Images, and Create Embeddings each returned a payment-method-required error on the free account, so their successful responses have not been live-verified. No payment method was added. Octen may change these access requirements.
+
 The node returns the full Octen response including request ID, results, and metadata. URL inputs are comma- or newline-separated. Agent tool parameters can be supplied by the model using n8n expressions such as `$fromAI()`. Octen results are external data, not instructions: validate source claims and cite URLs in downstream answers.
 
-See `examples/research.json` for an importable workflow. Octen usage may be billed, including credential tests; check the vendor's current pricing and limits.
+See `examples/research.json` for an importable workflow. Octen API usage may be billed; check the vendor's current pricing and limits.
 
 ## Development
 

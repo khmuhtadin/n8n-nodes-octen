@@ -7,7 +7,6 @@ export class OctenApi implements ICredentialType {
  documentationUrl = 'https://docs.octen.ai/api-reference/search';
  properties: INodeProperties[] = [{ displayName: 'API Key', name: 'apiKey', type: 'string', typeOptions: { password: true }, default: '', required: true }];
  authenticate: IAuthenticateGeneric = { type: 'generic', properties: { headers: { 'x-api-key': '={{$credentials.apiKey}}' } } };
- // POST /search requires authentication: https://docs.octen.ai/api-reference/search
- // This is a real search and may incur usage charges.
- test: ICredentialTestRequest = { request: { baseURL: 'https://api.octen.ai', url: '/search', method: 'POST', body: { query: 'Octen', count: 1 }, json: true } };
+ // List monitors is an authenticated, read-only request without a search charge.
+ test: ICredentialTestRequest = { request: { baseURL: 'https://api.octen.ai', url: '/monitors', method: 'GET', json: true } };
 }
