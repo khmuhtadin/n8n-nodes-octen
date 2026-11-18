@@ -33,3 +33,7 @@ Run `npm ci --ignore-scripts`, `npm run build`, `npm run lint`, and `npm test`. 
 Khairul Muhtadin, n8n Ambassador: https://linkedin.com/in/khmuhtadin
 
 MIT license.
+
+## Workflow template
+
+[`examples/template-octen-api-deprecation-watch.json`](examples/template-octen-api-deprecation-watch.json): **Track API deprecations with Octen, Google Sheets and Slack**. Import it in n8n (Workflows > Import from file). Setup steps are in the yellow sticky note.

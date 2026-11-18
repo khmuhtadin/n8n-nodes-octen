@@ -1,0 +1,429 @@
+{
+  "name": "Track API deprecations with Octen, Google Sheets and Slack",
+  "nodes": [
+    {
+      "id": "n001-0000-4000-8000-000000000000",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "content": "## Track API deprecations with Octen, Google Sheets and Slack\n\nIf your product or agent depends on third-party APIs, a missed deprecation notice breaks things quietly. Every week this workflow takes your list of APIs from Google Sheets, lets an AI agent search the live web with Octen for official deprecation or breaking-change notices, and posts anything new to Slack.\n\n### How it works\n1. A weekly schedule reads your watchlist (vendor, api, version).\n2. An AI agent uses the Octen Search tool to look for official announcements from the last month.\n3. A structured output parser turns the answer into fields: change found, summary, deadline, source.\n4. Changes already reported in earlier runs are skipped.\n5. New changes are logged to a sheet and posted to Slack.\n\n### Setup steps\n- [ ] Install the community node **n8n-nodes-octen** (Settings > Community nodes)\n- [ ] Add an Octen API key from octen.ai\n- [ ] Add an OpenAI credential (any OpenAI-compatible endpoint works)\n- [ ] Create sheets **Watchlist** (vendor, api, version) and **Changes** (date, vendor, api, summary, deadline, source_url)\n- [ ] Connect Google Sheets and Slack\n\n### Customization\nLimit Octen to vendor domains, run daily, or send to email or Jira instead of Slack.",
+        "width": 560,
+        "height": 720
+      }
+    },
+    {
+      "id": "n002-0000-4000-8000-000000000000",
+      "name": "1. Load the watchlist",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        620,
+        0
+      ],
+      "parameters": {
+        "content": "## 1. Load the watchlist\n\nRuns every Monday and reads the APIs you depend on from Google Sheets.",
+        "width": 580,
+        "height": 370,
+        "color": 7
+      }
+    },
+    {
+      "id": "n005-0000-4000-8000-000000000000",
+      "name": "2. Research with Octen",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        0
+      ],
+      "parameters": {
+        "content": "## 2. Research with Octen\n\nThe agent searches the live web with Octen and returns structured findings with an official source link.",
+        "width": 840,
+        "height": 570,
+        "color": 7
+      }
+    },
+    {
+      "id": "n010-0000-4000-8000-000000000000",
+      "name": "3. Keep only new changes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2120,
+        0
+      ],
+      "parameters": {
+        "content": "## 3. Keep only new changes\n\nDrops \"no change\" answers and anything already reported in a previous run.",
+        "width": 580,
+        "height": 370,
+        "color": 7
+      }
+    },
+    {
+      "id": "n013-0000-4000-8000-000000000000",
+      "name": "4. Log and alert",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2740,
+        0
+      ],
+      "parameters": {
+        "content": "## 4. Log and alert\n\nSaves each new change to the Changes sheet and posts it to your Slack channel.",
+        "width": 580,
+        "height": 370,
+        "color": 7
+      }
+    },
+    {
+      "id": "n003-0000-4000-8000-000000000000",
+      "name": "Every Monday",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "position": [
+        680,
+        180
+      ]
+    },
+    {
+      "id": "n004-0000-4000-8000-000000000000",
+      "name": "Get watchlist",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Watchlist"
+        },
+        "options": {}
+      },
+      "position": [
+        940,
+        180
+      ]
+    },
+    {
+      "id": "n006-0000-4000-8000-000000000000",
+      "name": "Find API changes",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "parameters": {
+        "promptType": "define",
+        "text": "=Check for official deprecation, end-of-life, breaking change or forced migration announcements published in the last 30 days for: {{ $json.vendor }} {{ $json.api }} {{ $json.version }}.\nUse the Octen search tool. Only trust the vendor's own docs, changelog, blog or status pages. If nothing official was published, set has_change to false.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You monitor third-party API changes for an engineering team. Be precise and never guess dates."
+        }
+      },
+      "position": [
+        1300,
+        180
+      ]
+    },
+    {
+      "id": "n007-0000-4000-8000-000000000000",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-6.1-sol"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI account"
+        }
+      },
+      "position": [
+        1300,
+        380
+      ]
+    },
+    {
+      "id": "n008-0000-4000-8000-000000000000",
+      "name": "Octen Search",
+      "type": "n8n-nodes-octen.octenTool",
+      "typeVersion": 1,
+      "parameters": {
+        "operation": "search",
+        "query": "={{ $fromAI('query', 'A focused web search query, e.g. vendor + api + deprecation', 'string') }}",
+        "count": 5,
+        "additionalOptions": {
+          "timeRange": "month"
+        }
+      },
+      "credentials": {
+        "octenApi": {
+          "id": "",
+          "name": "Octen account"
+        }
+      },
+      "position": [
+        1560,
+        380
+      ]
+    },
+    {
+      "id": "n009-0000-4000-8000-000000000000",
+      "name": "Findings format",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"has_change\": {\n      \"type\": \"boolean\"\n    },\n    \"summary\": {\n      \"type\": \"string\"\n    },\n    \"deadline\": {\n      \"type\": \"string\",\n      \"description\": \"ISO date or empty\"\n    },\n    \"source_url\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"has_change\",\n    \"summary\",\n    \"source_url\"\n  ]\n}"
+      },
+      "position": [
+        1820,
+        380
+      ]
+    },
+    {
+      "id": "n011-0000-4000-8000-000000000000",
+      "name": "Change found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.output.has_change }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        2180,
+        180
+      ]
+    },
+    {
+      "id": "n012-0000-4000-8000-000000000000",
+      "name": "Skip already reported",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "parameters": {
+        "operation": "removeItemsRepeatedInPreviousExecutions",
+        "dedupeValue": "={{ $json.output.source_url }}",
+        "options": {}
+      },
+      "position": [
+        2440,
+        180
+      ]
+    },
+    {
+      "id": "n014-0000-4000-8000-000000000000",
+      "name": "Log change",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Changes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $now.toISODate() }}",
+            "vendor": "={{ $('Get watchlist').item.json.vendor }}",
+            "api": "={{ $('Get watchlist').item.json.api }}",
+            "summary": "={{ $json.output.summary }}",
+            "deadline": "={{ $json.output.deadline }}",
+            "source_url": "={{ $json.output.source_url }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "position": [
+        2800,
+        180
+      ]
+    },
+    {
+      "id": "n015-0000-4000-8000-000000000000",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#api-changes"
+        },
+        "text": "=:warning: *{{ $('Get watchlist').item.json.vendor }} {{ $('Get watchlist').item.json.api }}*: {{ $('Skip already reported').item.json.output.summary }}\nDeadline: {{ $('Skip already reported').item.json.output.deadline || 'not stated' }}\nSource: {{ $('Skip already reported').item.json.output.source_url }}",
+        "otherOptions": {}
+      },
+      "credentials": {
+        "slackApi": {
+          "id": "",
+          "name": "Slack account"
+        }
+      },
+      "position": [
+        3060,
+        180
+      ]
+    }
+  ],
+  "connections": {
+    "Every Monday": {
+      "main": [
+        [
+          {
+            "node": "Get watchlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get watchlist": {
+      "main": [
+        [
+          {
+            "node": "Find API changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Find API changes",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Octen Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Find API changes",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Findings format": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Find API changes",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find API changes": {
+      "main": [
+        [
+          {
+            "node": "Change found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change found?": {
+      "main": [
+        [
+          {
+            "node": "Skip already reported",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip already reported": {
+      "main": [
+        [
+          {
+            "node": "Log change",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log change": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
